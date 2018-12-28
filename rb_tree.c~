@@ -1,0 +1,7 @@
+#include"rb_tree.h"
+
+int insert(rb_tree list,void *data){
+  while(1){
+    
+  }
+}

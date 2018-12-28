@@ -1,6 +1,11 @@
-typedef struct rb {
-  int color;
-  int data;
-  struct rb *left;
-  struct rb *right;
-}*rb;
+typedef struct node {
+  int red;
+  void *data;
+  struct node *leaves[2];
+}*node;
+
+
+typedef struct rb_tree {
+  int size;
+  struct node *head;
+}*rb_tree;
