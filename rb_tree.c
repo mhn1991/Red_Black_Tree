@@ -75,11 +75,13 @@ void color_flip(struct node * node){
 
 void left_rotation(struct node * grand_parent,struct node * parent,struct node * child){
   void * tmp = parent->data;
+  struct node * left = grand_parent->leaves[0];
   grand_parent->leaves[1] = child;
   grand_parent->leaves[0] = parent;
   parent->data = grand_parent->data;
   grand_parent->data = tmp;
   parent->leaves[1] = NULL;
+  parent->leaves[0] = left;
   //changing color
   grand_parent->red=0;
   parent->red = child->red = 1;
@@ -87,11 +89,13 @@ void left_rotation(struct node * grand_parent,struct node * parent,struct node *
 
 void right_rotation(struct node * grand_parent,struct node * parent,struct node * child){
   void * tmp = parent->data;
+  struct node * right = grand_parent->leaves[1];
   grand_parent->leaves[0] = child;
   grand_parent->leaves[1] = parent;
   parent->data = grand_parent->data;
   grand_parent->data = tmp;
   parent->leaves[0] = NULL;
+  parent->leaves[1] = right;
   // changing color
   grand_parent->red=0;
   parent->red = child->red = 1;
