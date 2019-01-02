@@ -1,7 +1,7 @@
 typedef struct node {
   int red;
   void *data;
-  struct node *leaves[2];
+  struct node *leaves[2];// 0 left 1 right
 }*node;
 
 
