@@ -153,12 +153,9 @@ void main(){
   if(tree){
     int list[] = {3,6,8};
     struct node * gp,*p,*ch;
-    ch = create_node((void *)&list[2]);
-    p = create_node((void *)&list[1]);
-    gp = create_node((void *)&list[0]);
-    ch->leaves[0] = p;
-    p->leaves[0] = gp;
-    right_rotation(ch,p,gp);
+    for(int i=0;i<3;i++){
+      ins(tree,create_node());
+    }
     printf("\t%d\n%d\t\t%d\n ",*(int *)ch->data,*(int *)ch->leaves[0]->data,*(int *)ch->leaves[1]->data);
   }
 }
