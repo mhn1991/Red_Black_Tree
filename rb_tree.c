@@ -104,17 +104,40 @@ void right_rotation(struct node * grand_parent,struct node * parent,struct node 
   parent->red = child->red = 1;
 }
 
-void check_violation(struct node *grand_parent,struct node * parent,struct node * child){
-  if(grand_parent->data < parent->data < child->data){
+void right_left_rotation(struct node * grand_parent,struct node * parent,struct node * child){
+  grand_parent->leaves[1] = child;
+  child->leaves[1] = parent;
+  child->parent  = grand_parent;
+  parent->parent = child;
+  parent->leaves[0] = NULL;
+  left_rotation(grand_parent,child,parent);
+}
+
+void left_right_rotation(struct node * grand_parent,struct node * parent,struct node * child){
+  grand_parent->leaves[0] = child;
+  child->leaves[0] = parent;
+  child->parent = grand_parent;
+  parent->parent = child;
+  parent->leaves[1] = NULL;
+  right_rotation(grand_parent,child,parent);
+}
+
+void check_balance(struct node *grand_parent,struct node * parent,struct node * child){
+  if((*(int *)grand_parent->data < *(int *)parent->data) && (*(int *)parent->data < *(int *)child->data)){
+    printf("left rotation\n");
+    printf("%d\t%d\t%d\n",*(int *)grand_parent->data,*(int *)parent->data,*(int *)child->data);
     left_rotation(grand_parent,parent,child);
-  }else if(grand_parent->data > parent->data > child->data){
+  }else if((*(int *)grand_parent->data > *(int *)parent->data)&&(*(int *)parent->data > *(int *)child->data)){
+    printf("right rotation\n");
     right_rotation(grand_parent,parent,child);
-  }else if(grand_parent->data > parent->data < child->data){
-
-  }else if(grand_parent->data < parent->data > child->data){
-
+  }else if((*(int *)grand_parent->data > *(int *)parent->data) && (*(int *)parent->data < *(int *)child->data)){
+    printf("left right rotation\n");
+    left_right_rotation(grand_parent,parent,child);
+  }else if((*(int *)grand_parent->data < *(int *)parent->data) && (*(int *)parent->data > *(int *)child->data)){
+    printf("right left rotation\n");
+    right_left_rotation(grand_parent,parent,child);
   }else{
-    printf("tree is balance!");
+    printf("tree is balance!\n");
   }
 }
 
@@ -135,14 +158,16 @@ void ins(struct rb_tree * tree,struct node * node){
 	iter->leaves[0] = node;
 	node->parent = iter;
 	if(iter->parent){
-	  check_violation(iter->parent,iter,node);
+	  check_balance(iter->parent,iter,node);
 	}
+	break;
       }else if (node->data > iter->data && iter->leaves[1] == NULL){
 	iter->leaves[1] = node;
 	node->parent = iter;
 	if(iter->parent){
-	  check_violation(iter->parent,iter,node);
+	  check_balance(iter->parent,iter,node);
 	}
+	break;
       }
     }
   }
@@ -151,14 +176,10 @@ void ins(struct rb_tree * tree,struct node * node){
 void main(){
   struct rb_tree * tree = create_tree();
   if(tree){
-    int list[] = {3,6,8};
-    struct node * gp,*p,*ch;
-    ch = create_node((void *)&list[2]);
-    p = create_node((void *)&list[1]);
-    gp = create_node((void *)&list[0]);
-    ch->leaves[0] = p;
-    p->leaves[0] = gp;
-    right_rotation(ch,p,gp);
-    printf("\t%d\n%d\t\t%d\n ",*(int *)ch->data,*(int *)ch->leaves[0]->data,*(int *)ch->leaves[1]->data);
+    int list[] = {8,4,6};
+    for(int i=0;i<3;i++){
+      ins(tree,create_node((void *)&list[i],NULL));
+    }
+    printf("%d\n",*(int *)tree->head->leaves[0]->data);
   }
 }
