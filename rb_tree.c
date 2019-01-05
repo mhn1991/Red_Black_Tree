@@ -69,6 +69,7 @@ void print_left(struct rb_tree * tree){
 void color_flip(struct node * node){
   //check we have valid node
   if(node){
+    printf("color flip\n");
     node->red = 1;
     node->leaves[0]->red = node->leaves[1]->red = 0;
   }
@@ -122,7 +123,7 @@ void left_right_rotation(struct node * grand_parent,struct node * parent,struct 
   right_rotation(grand_parent,child,parent);
 }
 
-void check_balance(struct node *grand_parent,struct node * parent,struct node * child){
+void rotations(struct node *grand_parent,struct node * parent,struct node * child){
   if((*(int *)grand_parent->data < *(int *)parent->data) && (*(int *)parent->data < *(int *)child->data)){
     printf("left rotation\n");
     printf("%d\t%d\t%d\n",*(int *)grand_parent->data,*(int *)parent->data,*(int *)child->data);
@@ -141,6 +142,34 @@ void check_balance(struct node *grand_parent,struct node * parent,struct node * 
   }
 }
 
+void check_rules(struct rb_tree * tree,struct node * parent,struct node * child){
+  if(parent->parent){
+    // there should not be two consecutive red node
+    if((parent->parent->red ==1 &&  parent->red ==1) || (parent->red == 1 && child->red == 1)){
+      printf("two red node\n");
+      int aunt_color = 2;
+      if(parent->parent->leaves[0] != NULL && *(int *) parent->parent->leaves[0]->data == *(int *)parent->data){
+	aunt_color = parent->parent->leaves[0]->red;
+      }else if(parent->parent->leaves[0] != NULL && *(int *) parent->parent->leaves[1]->data == *(int *)parent->data){
+	aunt_color = parent->parent->leaves[0]->red;
+      }else if(parent->parent->leaves[0] == NULL && *(int *) parent->parent->leaves[1]->data == *(int *)parent->data){
+	aunt_color = 0;
+      }else if(parent->parent->leaves[1] == NULL && *(int *) parent->parent->leaves[0]->data == *(int *)parent->data){
+	aunt_color = 0;
+      }
+      //printf("%d\n",aunt_color);
+      // if we have red aunt we do color flip
+      if(aunt_color == 1){
+	color_flip(parent->parent);
+      }else if (aunt_color == 0){
+	rotations(parent->parent,parent,child);
+      }
+    }
+    //make head black
+    tree->head->red=0;
+  }
+}
+
 void ins(struct rb_tree * tree,struct node * node){
   if(tree->head == NULL){
     node->parent = NULL;
@@ -150,22 +179,22 @@ void ins(struct rb_tree * tree,struct node * node){
     struct node *iter;
     iter = tree->head;
     while(1){
-      if(node->data < iter->data && iter->leaves[0] != NULL){
+      if(*(int*)node->data < *(int*)iter->data && iter->leaves[0] != NULL){
 	iter = iter->leaves[0];
-      }else if (node->data > iter->data && iter->leaves[1] != NULL){
+      }else if (*(int*)node->data > *(int*)iter->data && iter->leaves[1] != NULL){
 	iter = iter->leaves[1];
-      }else if (node->data < iter->data && iter->leaves[0] == NULL){
+      }else if (*(int*)node->data < *(int*)iter->data && iter->leaves[0] == NULL){
 	iter->leaves[0] = node;
 	node->parent = iter;
 	if(iter->parent){
-	  check_balance(iter->parent,iter,node);
+	  check_rules(tree,iter,node);
 	}
 	break;
-      }else if (node->data > iter->data && iter->leaves[1] == NULL){
+      }else if (*(int*)node->data > *(int*)iter->data && iter->leaves[1] == NULL){
 	iter->leaves[1] = node;
 	node->parent = iter;
 	if(iter->parent){
-	  check_balance(iter->parent,iter,node);
+	  check_rules(tree,iter,node);
 	}
 	break;
       }
@@ -176,8 +205,8 @@ void ins(struct rb_tree * tree,struct node * node){
 void main(){
   struct rb_tree * tree = create_tree();
   if(tree){
-    int list[] = {8,4,6};
-    for(int i=0;i<3;i++){
+    int list[] = {3,1,5,7,6,8,9};
+    for(int i=0;i<7;i++){
       ins(tree,create_node((void *)&list[i],NULL));
     }
     printf("%d\n",*(int *)tree->head->leaves[0]->data);
