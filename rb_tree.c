@@ -58,14 +58,6 @@ struct rb_tree * create_tree(){
   return init_tree(alloc_tree());
 }
 
-void print_left(struct rb_tree * tree){
-  struct node * p = tree->head;
-  while(p != NULL){
-    printf("%d\n",*(int *)(p->data));
-    p = p->leaves[0];
-  }
-}
-
 void color_flip(struct rb_tree * tree,struct node * node){
   //check we have valid node
   if(node){
@@ -78,7 +70,7 @@ void color_flip(struct rb_tree * tree,struct node * node){
   }
 }
 
-void left_rotation(struct node * grand_parent,struct node * parent,struct node * child){
+void left_rotation(struct rb_tree * tree,struct node * grand_parent,struct node * parent,struct node * child){
   void * tmp = parent->data;
   struct node * left = grand_parent->leaves[0];
   grand_parent->leaves[1] = child;
@@ -91,9 +83,12 @@ void left_rotation(struct node * grand_parent,struct node * parent,struct node *
   //changing color
   grand_parent->red=0;
   parent->red = child->red = 1;
+  if(grand_parent->parent){
+    check_rules(tree,grand_parent->parent,grand_parent);
+  }
 }
 
-void right_rotation(struct node * grand_parent,struct node * parent,struct node * child){
+void right_rotation(struct rb_tree * tree,struct node * grand_parent,struct node * parent,struct node * child){
   void * tmp = parent->data;
   struct node * right = grand_parent->leaves[1];
   grand_parent->leaves[0] = child;
@@ -106,40 +101,42 @@ void right_rotation(struct node * grand_parent,struct node * parent,struct node 
   // changing color
   grand_parent->red=0;
   parent->red = child->red = 1;
+  if(grand_parent->parent){
+    check_rules(tree,grand_parent->parent,grand_parent);
+  }
 }
 
-void right_left_rotation(struct node * grand_parent,struct node * parent,struct node * child){
+void right_left_rotation(struct rb_tree * tree,struct node * grand_parent,struct node * parent,struct node * child){
   grand_parent->leaves[1] = child;
   parent->leaves[0] = child->leaves[1];
   child->leaves[1] = parent;
   parent->parent = child;
   child->parent = grand_parent;
-  left_rotation(grand_parent,child,parent);
+  left_rotation(tree,grand_parent,child,parent);
 }
 
-void left_right_rotation(struct node * grand_parent,struct node * parent,struct node * child){
+void left_right_rotation(struct rb_tree * tree,struct node * grand_parent,struct node * parent,struct node * child){
   grand_parent->leaves[0] = child;
   parent->leaves[1] = child->leaves[0];
   child->leaves[0] = parent;
   parent->parent = child;
   child->parent = grand_parent;
-  right_rotation(grand_parent,child,parent);
+  right_rotation(tree,grand_parent,child,parent);
 }
 
-void rotations(struct node *grand_parent,struct node * parent,struct node * child){
+void rotations(struct rb_tree * tree,struct node *grand_parent,struct node * parent,struct node * child){
   if((*(int *)grand_parent->data < *(int *)parent->data) && (*(int *)parent->data < *(int *)child->data)){
     printf("left rotation\n");
-    printf("%d\t%d\t%d\n",*(int *)grand_parent->data,*(int *)parent->data,*(int *)child->data);
-    left_rotation(grand_parent,parent,child);
+    left_rotation(tree,grand_parent,parent,child);
   }else if((*(int *)grand_parent->data > *(int *)parent->data)&&(*(int *)parent->data > *(int *)child->data)){
     printf("right rotation\n");
-    right_rotation(grand_parent,parent,child);
+    right_rotation(tree,grand_parent,parent,child);
   }else if((*(int *)grand_parent->data > *(int *)parent->data) && (*(int *)parent->data < *(int *)child->data)){
     printf("left right rotation\n");
-    left_right_rotation(grand_parent,parent,child);
+    left_right_rotation(tree,grand_parent,parent,child);
   }else if((*(int *)grand_parent->data < *(int *)parent->data) && (*(int *)parent->data > *(int *)child->data)){
     printf("right left rotation\n");
-    right_left_rotation(grand_parent,parent,child);
+    right_left_rotation(tree,grand_parent,parent,child);
   }else{
     printf("tree is balance!\n");
   }
@@ -165,11 +162,12 @@ void check_rules(struct rb_tree * tree,struct node * parent,struct node * child)
       if(aunt_color == 1){
 	color_flip(tree,parent->parent);
       }else if (aunt_color == 0){
-	rotations(parent->parent,parent,child);
+	rotations(tree,parent->parent,parent,child);
       }
     }
     //make head black
     tree->head->red=0;
+    tree->head->parent = NULL;
   }
 }
 
