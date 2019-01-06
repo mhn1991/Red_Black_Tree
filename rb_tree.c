@@ -66,12 +66,15 @@ void print_left(struct rb_tree * tree){
   }
 }
 
-void color_flip(struct node * node){
+void color_flip(struct rb_tree * tree,struct node * node){
   //check we have valid node
   if(node){
     printf("color flip\n");
     node->red = 1;
     node->leaves[0]->red = node->leaves[1]->red = 0;
+    if(node->parent){
+      check_rules(tree,node->parent,node);
+    }
   }
 }
 
@@ -82,7 +85,7 @@ void left_rotation(struct node * grand_parent,struct node * parent,struct node *
   grand_parent->leaves[0] = parent;
   parent->data = grand_parent->data;
   grand_parent->data = tmp;
-  parent->leaves[1] = NULL;
+  parent->leaves[1] = parent->leaves[0];
   parent->leaves[0] = left;
   child->parent = grand_parent;
   //changing color
@@ -97,7 +100,7 @@ void right_rotation(struct node * grand_parent,struct node * parent,struct node 
   grand_parent->leaves[1] = parent;
   parent->data = grand_parent->data;
   grand_parent->data = tmp;
-  parent->leaves[0] = NULL;
+  parent->leaves[0] = parent->leaves[1];
   parent->leaves[1] = right;
   child->parent = grand_parent;
   // changing color
@@ -107,19 +110,19 @@ void right_rotation(struct node * grand_parent,struct node * parent,struct node 
 
 void right_left_rotation(struct node * grand_parent,struct node * parent,struct node * child){
   grand_parent->leaves[1] = child;
+  parent->leaves[0] = child->leaves[1];
   child->leaves[1] = parent;
-  child->parent  = grand_parent;
   parent->parent = child;
-  parent->leaves[0] = NULL;
+  child->parent = grand_parent;
   left_rotation(grand_parent,child,parent);
 }
 
 void left_right_rotation(struct node * grand_parent,struct node * parent,struct node * child){
   grand_parent->leaves[0] = child;
+  parent->leaves[1] = child->leaves[0];
   child->leaves[0] = parent;
-  child->parent = grand_parent;
   parent->parent = child;
-  parent->leaves[1] = NULL;
+  child->parent = grand_parent;
   right_rotation(grand_parent,child,parent);
 }
 
@@ -160,7 +163,7 @@ void check_rules(struct rb_tree * tree,struct node * parent,struct node * child)
       //printf("%d\n",aunt_color);
       // if we have red aunt we do color flip
       if(aunt_color == 1){
-	color_flip(parent->parent);
+	color_flip(tree,parent->parent);
       }else if (aunt_color == 0){
 	rotations(parent->parent,parent,child);
       }
@@ -205,10 +208,10 @@ void ins(struct rb_tree * tree,struct node * node){
 void main(){
   struct rb_tree * tree = create_tree();
   if(tree){
-    int list[] = {3,1,5,7,6,8,9};
-    for(int i=0;i<7;i++){
+    int list[] = {3,1,5,7,6,8,9,10};
+    for(int i=0;i<8;i++){
       ins(tree,create_node((void *)&list[i],NULL));
     }
-    printf("%d\n",*(int *)tree->head->leaves[0]->data);
+    printf("%d\n",*(int *)tree->head->leaves[0]->leaves[1]->data);
   }
 }
