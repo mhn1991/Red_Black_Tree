@@ -203,6 +203,38 @@ void ins(struct rb_tree * tree,struct node * node){
   }
 }
 
+void print2DUtil(struct node *root, int space)
+{
+  // Base case
+  if (root == NULL)
+    return;
+
+  // Increase distance between levels
+  space += 10;
+
+  // Process right child first
+  print2DUtil(root->leaves[1], space);
+
+  // Print current node after space
+  // count
+  //cout<<endl;
+  printf("\n");
+  for (int i = 10; i < space; i++){
+    printf(" ");
+  }
+  printf("%d\n",*(int*)root->data);
+  // Process left child
+  print2DUtil(root->leaves[0], space);
+}
+
+// Wrapper over print2DUtil()
+void print2D(struct node *root)
+{
+  // Pass initial space count as 0
+  print2DUtil(root, 0);
+}  
+
+
 void main(){
   struct rb_tree * tree = create_tree();
   if(tree){
@@ -210,6 +242,6 @@ void main(){
     for(int i=0;i<8;i++){
       ins(tree,create_node((void *)&list[i],NULL));
     }
-    printf("%d\n",*(int *)tree->head->leaves[0]->leaves[1]->data);
+    print2D(tree->head);
   }
 }
