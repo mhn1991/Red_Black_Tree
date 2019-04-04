@@ -70,7 +70,8 @@ void color_flip(struct rb_tree * tree,struct node * node){
   }
 }
 
-void left_rotation(struct rb_tree * tree,struct node * grand_parent,struct node * parent,struct node * child){
+void left_rotation(struct rb_tree * tree,struct node * grand_parent,
+		   struct node * parent,struct node * child){
   void * tmp = parent->data;
   struct node * left = grand_parent->leaves[0];
   grand_parent->leaves[1] = child;
@@ -88,7 +89,8 @@ void left_rotation(struct rb_tree * tree,struct node * grand_parent,struct node 
   }
 }
 
-void right_rotation(struct rb_tree * tree,struct node * grand_parent,struct node * parent,struct node * child){
+void right_rotation(struct rb_tree * tree,struct node * grand_parent,
+		    struct node * parent,struct node * child){
   void * tmp = parent->data;
   struct node * right = grand_parent->leaves[1];
   grand_parent->leaves[0] = child;
@@ -106,7 +108,8 @@ void right_rotation(struct rb_tree * tree,struct node * grand_parent,struct node
   }
 }
 
-void right_left_rotation(struct rb_tree * tree,struct node * grand_parent,struct node * parent,struct node * child){
+void right_left_rotation(struct rb_tree * tree,struct node * grand_parent,
+			 struct node * parent,struct node * child){
   grand_parent->leaves[1] = child;
   parent->leaves[0] = child->leaves[1];
   child->leaves[1] = parent;
@@ -115,7 +118,8 @@ void right_left_rotation(struct rb_tree * tree,struct node * grand_parent,struct
   left_rotation(tree,grand_parent,child,parent);
 }
 
-void left_right_rotation(struct rb_tree * tree,struct node * grand_parent,struct node * parent,struct node * child){
+void left_right_rotation(struct rb_tree * tree,struct node * grand_parent,
+			 struct node * parent,struct node * child){
   grand_parent->leaves[0] = child;
   parent->leaves[1] = child->leaves[0];
   child->leaves[0] = parent;
@@ -124,7 +128,8 @@ void left_right_rotation(struct rb_tree * tree,struct node * grand_parent,struct
   right_rotation(tree,grand_parent,child,parent);
 }
 
-void rotations(struct rb_tree * tree,struct node *grand_parent,struct node * parent,struct node * child){
+void rotations(struct rb_tree * tree,struct node *grand_parent,
+	       struct node * parent,struct node * child){
   if((*(int *)grand_parent->data < *(int *)parent->data) && (*(int *)parent->data < *(int *)child->data)){
     printf("left rotation\n");
     left_rotation(tree,grand_parent,parent,child);
@@ -142,7 +147,8 @@ void rotations(struct rb_tree * tree,struct node *grand_parent,struct node * par
   }
 }
 
-void check_rules(struct rb_tree * tree,struct node * parent,struct node * child){
+void check_rules(struct rb_tree * tree,struct node * parent,
+		 struct node * child){
   if(parent->parent){
     // there should not be two consecutive red node
     if((parent->parent->red ==1 &&  parent->red ==1) || (parent->red == 1 && child->red == 1)){
@@ -234,14 +240,49 @@ void print2D(struct node *root)
   print2DUtil(root, 0);
 }  
 
+int delete(struct rb_tree * tree,int value){
 
-void main(){
+  struct node * head = tree->head;
+  int flag =0;
+  while(1){
+    //go right
+    if (*(int *) head->data <= value && head->leaves[1] != NULL){
+      if(*(int *) head->data == value){
+
+      }else{
+	head = head->leaves[1];
+      }
+    }else if(*(int *) head->data < value && head->leaves[1] == NULL){
+      flag = 1;
+      break;
+    }
+    //go left
+    if (*(int *) head->data >= value && head->leaves[0] != NULL){
+
+      if(*(int*) head->data == value){
+
+      }else{
+	head = head->leaves[0];
+      }
+      
+    }else if(*(int *) head->data > value && head->leaves[0] == NULL){
+      flag = 1;
+      break;
+    }
+  }
+  return 0;
+}
+
+
+int main(){
   struct rb_tree * tree = create_tree();
   if(tree){
     int list[] = {3,1,5,7,6,8,9,10};
     for(int i=0;i<8;i++){
       ins(tree,create_node((void *)&list[i],NULL));
     }
+    delete(tree,2);
     print2D(tree->head);
   }
+  return 0;
 }
