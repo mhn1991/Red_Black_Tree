@@ -220,10 +220,6 @@ void print2DUtil(struct node *root, int space)
 
   // Process right child first
   print2DUtil(root->leaves[1], space);
-
-  // Print current node after space
-  // count
-  //cout<<endl;
   printf("\n");
   for (int i = 10; i < space; i++){
     printf(" ");
@@ -240,6 +236,22 @@ void print2D(struct node *root)
   print2DUtil(root, 0);
 }  
 
+int delete_helper(struct node * node){
+  struct node * child = node->leaves[1];
+  while(child->leaves[0] != NULL){
+    child = child->leaves[0];
+  }
+  //node and it's child are red
+  if(node->red == 1 && child->red == 1){
+    node->data = child->data;
+    child->parent->leaves[0] = NULL;
+    free(child);
+  }
+  //either node or it's child is red
+  
+  return 0;
+}
+
 int delete(struct rb_tree * tree,int value){
 
   struct node * head = tree->head;
@@ -248,7 +260,8 @@ int delete(struct rb_tree * tree,int value){
     //go right
     if (*(int *) head->data <= value && head->leaves[1] != NULL){
       if(*(int *) head->data == value){
-
+	delete_helper(head);
+	break;
       }else{
 	head = head->leaves[1];
       }
@@ -260,7 +273,8 @@ int delete(struct rb_tree * tree,int value){
     if (*(int *) head->data >= value && head->leaves[0] != NULL){
 
       if(*(int*) head->data == value){
-
+	delete_helper(head);
+	break;
       }else{
 	head = head->leaves[0];
       }
@@ -277,11 +291,12 @@ int delete(struct rb_tree * tree,int value){
 int main(){
   struct rb_tree * tree = create_tree();
   if(tree){
-    int list[] = {3,1,5,7,6,8,9,10};
+    //int list[] = {3,1,5,7,6,8,9,10};
+    int list[] = {10,5,30,-5,7,20,38,35};
     for(int i=0;i<8;i++){
       ins(tree,create_node((void *)&list[i],NULL));
     }
-    delete(tree,2);
+    delete(tree,30);
     print2D(tree->head);
   }
   return 0;
