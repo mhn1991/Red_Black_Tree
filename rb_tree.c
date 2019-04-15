@@ -236,19 +236,53 @@ void print2D(struct node *root)
   print2DUtil(root, 0);
 }  
 
+int double_black_delete(struct node *parent){
+  struct node * sibling =  calloc(1,sizeof(struct node *));
+  if(parent->leaves[0] == NULL){
+    sibling = parent->leaves[1];
+  }else{
+    sibling = parent->leaves[0];
+  }
+  
+  if(parent->red == 1 && sibling->red == 0){
+    parent->red = 0;
+    sibling->red = 1;
+  }
+}
+
+
 int delete_helper(struct node * node){
   struct node * child = node->leaves[1];
   while(child->leaves[0] != NULL){
     child = child->leaves[0];
   }
-  //node and it's child are red
-  if(node->red == 1 && child->red == 1){
+  //child is red
+  if(child->red == 1){
     node->data = child->data;
     child->parent->leaves[0] = NULL;
     free(child);
+    return 1;
   }
-  //either node or it's child is red
-  
+  //child is black but it has a red child
+  if(child->red != child->leaves[1]->red){
+    node->data = child->data;
+    //replace nodes
+    child->parent->leaves[0] = child->leaves[1];
+    child->parent->leaves[0]->red = 0;
+    free(child);
+    return 1;
+  }
+
+  node->data = child->data;
+  if(child->parent->leaves[0] == child){
+    child->parent->leaves[0] = NULL;
+    free(child);
+  }else{
+    child->parent->leaves[1] = NULL;
+    free(child);
+  }
+  // double black cases
+  double_black_delete(child->parent);
   return 0;
 }
 
@@ -291,12 +325,14 @@ int delete(struct rb_tree * tree,int value){
 int main(){
   struct rb_tree * tree = create_tree();
   if(tree){
-    //int list[] = {3,1,5,7,6,8,9,10};
-    int list[] = {10,5,30,-5,7,20,38,35};
-    for(int i=0;i<8;i++){
+    //int list[] = {3,1,5,7,6,8,9,10}; // checking rotations
+    //int list[] = {10,5,30,-5,7,20,38,35}; // check first delete case
+    //int list[] = {10,5,30,-5,7,20,38,32,41,35};
+    int list[] = {10,-10,30,20,38};
+    for(int i=0;i<5;i++){
       ins(tree,create_node((void *)&list[i],NULL));
     }
-    delete(tree,30);
+    delete(tree,10);
     print2D(tree->head);
   }
   return 0;
